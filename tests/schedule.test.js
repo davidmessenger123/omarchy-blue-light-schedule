@@ -59,7 +59,6 @@ function parseManaged(text) {
   return {times:times, temperature:temps.length?temps[0]:null}
 }
 
-const fs = require("fs")
 
 let fails = 0
 const eq = (got, want, what) => {
@@ -107,11 +106,11 @@ eq(minutesToNextBoundary(night, toMinutes("23:59")), 421, "23:59 -> 421 min (07:
 eq(minutesToNextBoundary(night, toMinutes("20:00")), 660, "20:00 -> 660 min (07:00)")
 eq(minutesToNextBoundary(night, toMinutes("06:59")), 1,   "06:59 -> 1 min")
 
-console.log("--- conf rewriting on the real hyprsunset.conf ---")
-const live = fs.readFileSync(process.env.HOME + "/.config/hypr/hyprsunset.conf", "utf8")
-// A stand-in for a conf the plugin has never touched. The live file cannot be
-// used for this: once the plugin is installed it is managed, and asserting on
-// it would only prove the plugin had already run.
+console.log("--- conf rewriting ---")
+// A stand-in for a conf the plugin has never touched. The tests are
+// hermetic on purpose: the live file cannot be used here, because once the
+// plugin is installed it is managed, and asserting on it would only
+// prove the plugin had already run.
 const stock = [
   "# Makes hyprsunset do nothing to the screen by default",
   "# Without this, the default applies some tint to the monitor",
@@ -129,7 +128,6 @@ eq(stock.includes("# Makes hyprsunset do nothing to the screen by default"), out
 eq(stock.includes("#     temperature = 4000"), out.includes("#     temperature = 4000"), "commented-out profile kept")
 eq(/^profile \{/m.test(out), true, "exactly one uncommented profile pair written")
 eq(stripProfiles(out).replace(/\s+$/,""), stock.replace(/\s+$/,""), "round trip leaves the stock file byte-identical")
-eq(live.length > 0, true, "live hyprsunset.conf is readable")
 
 console.log("--- idempotence ---")
 const twice = composeSchedule({start:"20:00",stop:"07:00",temperature:4000}, out)
