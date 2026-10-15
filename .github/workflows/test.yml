@@ -22,12 +22,20 @@ jobs:
           sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools
       - name: QML syntax
         # --bare parses without resolving imports. The Quickshell and Omarchy
-        # shell modules are not available here, so the type checking a normal
-        # run would do is not the point here; catching a syntax error is.
+        # shell modules are absent here, so the import/type warnings it leaves
+        # behind are expected, and whether warnings alone change the exit code
+        # differs between Qt versions (Arch's qmllint returns 0, Ubuntu's does
+        # not). So fail on the "syntax" diagnostic specifically, not the code.
         # Debian/Ubuntu ship the tool under /usr/lib/qt6/bin rather than on PATH.
         run: |
           QMLLINT="$(command -v qmllint || find /usr/lib/qt6/bin /usr/lib/*/qt6/bin -name qmllint -type f 2>/dev/null | head -1)"
           if [ -z "$QMLLINT" ]; then echo "qmllint not found"; exit 1; fi
-          "$QMLLINT" --bare Service.qml BarWidget.qml
+          "$QMLLINT" --bare --json qmllint.json Service.qml BarWidget.qml || true
+          if grep -q '"id":"syntax"' qmllint.json; then
+            echo "::error::QML syntax error"
+            cat qmllint.json
+            exit 1
+          fi
+          echo "No QML syntax errors."
       - name: Unit tests
         run: node tests/schedule.test.js
