@@ -1,0 +1,29 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@11bd71901bbe5b1630ceea73d27597364c9af683
+        with:
+          persist-credentials: false
+      - name: Install QML tooling
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends qt6-declarative-dev-tools
+      - name: QML syntax
+        # --bare parses without resolving imports. The Quickshell and Omarchy
+        # shell modules are not available here, so the type checking a normal
+        # run would do is not the point here; catching a syntax error is.
+        run: qmllint --bare Service.qml BarWidget.qml
+      - name: Unit tests
+        run: node tests/schedule.test.js

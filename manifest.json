@@ -1,0 +1,26 @@
+{
+  "$schema": "https://raw.githubusercontent.com/omarchy/omarchy/main/schemas/plugin.json",
+  "schemaVersion": 1,
+  "id": "davidjm.blue-light-schedule",
+  "name": "Blue Light Schedule",
+  "version": "1.0.0",
+  "author": "David JM",
+  "license": "MIT",
+  "description": "Applies a blue light filter on a daily window you choose, by driving hyprsunset with time-based colour-temperature profiles. Left-click the bar widget to set the start and stop times and the temperature; the schedule is written into ~/.config/hypr/hyprsunset.conf as a managed block, so it keeps working across shell restarts and while the shell is down.",
+  "kinds": [
+    "service",
+    "bar-widget"
+  ],
+  "keepLoaded": true,
+  "entryPoints": {
+    "service": "Service.qml",
+    "barWidget": "BarWidget.qml"
+  },
+  "barWidget": {
+    "displayName": "Blue Light Schedule",
+    "description": "Shows whether the blue light filter is on right now and when it changes next. Left-click opens a panel with the start time, the stop time, the filter temperature and an enable switch. Backed by hyprsunset profiles in ~/.config/hypr/hyprsunset.conf.",
+    "category": "System",
+    "allowMultiple": false,
+    "defaultSection": "right"
+  }
+}
